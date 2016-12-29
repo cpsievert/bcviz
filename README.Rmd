@@ -1,0 +1,32 @@
+---
+title: "Notes on BC Data Vis Challenge"
+output: 
+  bookdown::html_document2:
+    number_sections: false
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  fig.align = "center"
+)
+```
+
+
+## Useful links:
+
+  * [The suggested data sets](https://github.com/bcgov/housing-data-visualization-project/blob/master/data-sets-list.md)
+  * [The Challenge Overview](http://bcic.ca/wp-content/uploads/2016/12/Data-Visualiation-Challenge-Overview.pdf)
+  * [Our Letter of Intent](https://docs.google.com/document/d/1tix5g2nCKlqDX8YXevZBIUNOA55Hhq7xYyri_y07BCA/edit)
+  
+## Some thoughts
+
+The app should obviously have some drill-down capabilities, where users can see overall trends, then zoom-in to reveal detailed information for specific region(s). However, as Figure \@ref(fig:regions) shows, there are many types of regions!
+
+```{r regions, fig.cap = "Different types of regions available in the forecast of households."}
+knitr::include_graphics("regions.png")
+```
+
+Eventually it may be useful to alter the type of region(s), but for now, it seems "regional districts" is the best default type. 
