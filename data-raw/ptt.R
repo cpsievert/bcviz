@@ -1,3 +1,5 @@
+# Apparently we might get better/more granular data...
+
 library(rvest)
 library(curl)
 
@@ -10,12 +12,13 @@ sources <- src %>%
   html_attrs() %>%
   sapply("[[", "href") %>%
   grep("\\.csv$", ., value = TRUE)
-  
-if (!dir.exists("data/ptt")) {
-  dir.create("data/ptt")
+
+targets <- file.path("data-raw", basename(sources))
+
+for (i in seq_along(targets)) {
+  target <- targets[[i]]
+  if (!file.exists(target)) curl_download(sources[[i]], target)
 }
 
-targets <- file.path("data/ptt", basename(sources))
-
-res <- Map(curl_download, sources, targets)
-
+ptt <- readr::read_csv("data-raw/regional-district-weekly.csv")
+devtools::use_data(ptt, overwrite = TRUE)

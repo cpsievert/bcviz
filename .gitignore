@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 README.html
-data/
+data-raw/*.zip
+data-raw/*.csv
 notes.txt
 dates.png

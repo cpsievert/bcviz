@@ -7,9 +7,9 @@ CANSIM <- function(n = "4010004") {
   filename <- paste0("0", n, "-eng")
   url <- paste0(url, filename, ".zip")
   curl::curl_download(url, temp, quiet = TRUE)
-  unzip(temp, exdir = "data")
-  readr::read_csv(file.path("data", paste0(filename, ".csv")))
+  unzip(temp, exdir = "data-raw")
+  readr::read_csv(file.path("data-raw", paste0(filename, ".csv")))
 }
 
-d <- CANSIM()
+#d <- CANSIM()
 d2 <- CANSIM("0510011")
