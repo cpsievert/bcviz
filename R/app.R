@@ -84,7 +84,7 @@ launch <- function() {
     
     output$pop <- renderPlotly({
       
-      # always show all of BC
+      # always show overall BC population
       d <- popDistricts[popDistricts$district %in% c(regions$selected, "British Columbia"), ]
       
       p <- ggplot(d, aes(Age, Population, color = Gender)) +
@@ -95,12 +95,14 @@ launch <- function() {
         labs(y = NULL)
       
       ggplotly(p, dynamicTicks = TRUE, tooltip = "Gender") %>%
-        style(showlegend = FALSE, traces = 3:100) %>%
-        animation_opts(100)
+        #style(showlegend = FALSE, traces = 3:100) %>%
+        animation_opts(300)
     })
     
     # redraw polygons upon changing the region type
     observeEvent(input$regionType, {
+      
+      regions$selected <- NULL
       
       d <- switch(
         input$regionType,

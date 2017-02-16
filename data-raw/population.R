@@ -45,14 +45,14 @@ popDistricts <- pd %>%
 devtools::use_data(popDistricts, overwrite = TRUE)
 
 # visualize evolution for entire BC area
-#bc <- filter(popDistricts, district == "British Columbia")
-#
-#p <- ggplot(bc, aes(Age, Population, color = Gender)) +
-#  geom_line(aes(group = Year), alpha = 0.1) +
-#  geom_line(aes(frame = Year))
-#ggplotly(p) %>%
-#  style(showlegend = FALSE, traces = 1:2) %>%
-#  animation_opts(100)
+bc <- filter(popDistricts, district %in% c("British Columbia", "Peace River"))
+
+p <- ggplot(bc, aes(Age, Population, color = Gender)) +
+  geom_line(aes(group = Year), alpha = 0.1) +
+  geom_line(aes(frame = Year)) + 
+  facet_wrap(~district, ncol = 1, scales = "free_y")
+ggplotly(p) %>%
+  animation_opts(100)
 
 
 # ------------------------------------------------------------------------
