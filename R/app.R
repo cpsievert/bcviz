@@ -10,35 +10,44 @@
 
 launch <- function(prompt = interactive()) {
   
+  # geographic data
+  data("geoDevelopments", package = "bcviz")
   data("geoDistricts", package = "bcviz")
   data("geoMunicipals", package = "bcviz")
+  
+  # population estimates
   data("popDistricts", package = "bcviz")
+  
+  # property tax transfer
   data("ptt", package = "bcviz")
   
   bb <- st_bbox(geoDistricts)
   
   # user interface
-  ui <- fluidPage(
-    fluidRow(
-      column(
-        4, leafletOutput("map", height = 600),
-        # TODO: should this be a conditional panel?
-        selectInput("regionType", "Region Type:", c("districts", "municipals"))
-      ),
-      column(
-        8,
-        tabsetPanel(
-          tabPanel(
-            "BC",
-            # TODO: dynamically adjust height!
-            plotlyOutput("pop", height = 650), 
-            value = "bc"
-          ),
-          tabPanel("Vancouver", plotlyOutput("vancouver"), value = "vancouver"),
-          id = "tabset"
-        ))
-    )
-  )
+  ui <- fluidPage(fluidRow(
+    column(
+      4, leafletOutput("map", height = 400),
+      # TODO: should this be a conditional panel?
+      selectInput(
+        "regionType", "Region Type:", selected = "districts",
+        c("Development Regions" = "developments", 
+          "Regional Districts" = "districts", 
+          "Municipalities" = "municipals")
+      )
+    ),
+    column(
+      8,
+      tabsetPanel(
+        tabPanel(
+          "BC",
+          # TODO: dynamically adjust height!
+          plotlyOutput("pop", height = 650), 
+          value = "bc"
+        ),
+        tabPanel("Vancouver", plotlyOutput("vancouver"), value = "vancouver"),
+        id = "tabset"
+      ))
+  ))
   
   # server-side logic
   server <- function(input, output, session, ...) {
@@ -52,7 +61,7 @@ launch <- function(prompt = interactive()) {
         addTiles() %>%
         # TODO: why isn't fitBounds() consistent? Why does setView() lead to console errors?
         fitBounds(bb[["xmin"]], bb[["ymin"]], bb[["xmax"]], bb[["ymax"]])
-        #setView(mean(bb[c("xmin", "xmax")]), mean(bb[c("ymin", "ymax")]), 4.5)
+      #setView(mean(bb[c("xmin", "xmax")]), mean(bb[c("ymin", "ymax")]), 4.5)
     })
     
     # update reactive values upon clicking the map and modify opacity sensibly
@@ -62,6 +71,7 @@ launch <- function(prompt = interactive()) {
       
       d <- switch(
         input$regionType,
+        developments = geoDevelopments,
         districts = geoDistricts,
         municipals = geoMunicipals
       )
@@ -108,6 +118,7 @@ launch <- function(prompt = interactive()) {
       
       d <- switch(
         input$regionType,
+        developments = geoDevelopments,
         districts = geoDistricts,
         municipals = geoMunicipals
       )
@@ -126,5 +137,8 @@ launch <- function(prompt = interactive()) {
     
   }
   
-  shinyApp(ui, server, options = list(launch.browser = prompt))
+  shinyApp(
+    ui, server, 
+    options = list(launch.browser = prompt)
+  )
 }

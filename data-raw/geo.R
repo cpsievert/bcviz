@@ -5,7 +5,22 @@ library(sf)
 library(curl)
 
 # ---------------------------------------------------------------------------
-# obtain/simplify shape files for the 28 district boundaries 
+# obtain/simplify shape files for the 8 Development regions
+# ---------------------------------------------------------------------------
+
+district <- "http://www.bcstats.gov.bc.ca/Files/8057f3fc-ea90-4764-8684-db3031c0bd38/Boundaries-DevelopmentRegions.zip"
+target <- file.path("data-raw",  basename(district))
+if (!file.exists(target)) {
+  curl_download(district, target)
+}
+unzip(target, exdir = "data-raw/tmp")
+d <- st_read("data-raw/tmp/DR.shp")
+d2 <- st_simplify(d, dTolerance = 350)
+geoDevelopments <- mutate(st_transform(d2, 4326), label = DR_NAME)
+devtools::use_data(geoDevelopments, overwrite = TRUE)
+
+# ---------------------------------------------------------------------------
+# obtain/simplify shape files for the 28 regional districts
 # ---------------------------------------------------------------------------
 
 district <- "http://www.bcstats.gov.bc.ca/Files/18885d4f-e4cf-443b-bb3b-d169651be62d/Boundaries-CensusDivisions2011.zip"

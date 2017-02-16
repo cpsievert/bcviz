@@ -19,3 +19,8 @@ if (!require(devtools)) install.packages("devtools")
 devtools::install_github("cpsievert/bcviz")
 bcviz::launch()
 ```
+
+
+**Note for Linux users:**
+
+This app depends on the R package **sf**, which has a number of system requirements. You may need to replicate some of the `before_install:` recipes in its [.travis.yml file](https://github.com/edzer/sfr/blob/master/.travis.yml) to successfully install it.
