@@ -4,7 +4,11 @@
 \alias{launch}
 \title{Launch visualization}
 \usage{
-launch()
+launch(prompt = interactive())
+}
+\arguments{
+\item{prompt}{whether or not to prompt the default browser to open the app. 
+By default, a browser is prompted when R is being used interactively.}
 }
 \description{
 Launch visualization

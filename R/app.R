@@ -1,12 +1,14 @@
 #' Launch visualization
 #' 
+#' @param prompt whether or not to prompt the default browser to open the app. 
+#' By default, a browser is prompted when R is being used interactively.
 #' @export
 #' @author Carson Sievert
 #' @examples 
 #' 
 #' launch()
 
-launch <- function() {
+launch <- function(prompt = interactive()) {
   
   data("geoDistricts", package = "bcviz")
   data("geoMunicipals", package = "bcviz")
@@ -124,5 +126,5 @@ launch <- function() {
     
   }
   
-  shinyApp(ui, server)
+  shinyApp(ui, server, options = list(launch.browser = prompt))
 }

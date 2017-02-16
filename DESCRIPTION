@@ -21,3 +21,6 @@ Suggests:
   broom,
   bookdown
 RoxygenNote: 6.0.1
+Remotes:
+  rstudio/leaflet,
+  ropensci/plotly
