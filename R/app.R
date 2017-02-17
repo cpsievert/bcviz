@@ -16,6 +16,7 @@ launch <- function(prompt = interactive()) {
   data("geoMunicipals", package = "bcviz")
   
   # population estimates
+  data("popDevelopments", package = "bcviz")
   data("popDistricts", package = "bcviz")
   
   # property tax transfer
@@ -26,27 +27,17 @@ launch <- function(prompt = interactive()) {
   # user interface
   ui <- fluidPage(fluidRow(
     column(
-      4, leafletOutput("map", height = 400),
-      # TODO: should this be a conditional panel?
+      4, leafletOutput("map", height = 450),
+      # TODO: should this be a conditional panel (based on the statistic)?
       selectInput(
-        "regionType", "Region Type:", selected = "districts",
+        "regionType", "Choose a resolution:",
         c("Development Regions" = "developments", 
-          "Regional Districts" = "districts", 
-          "Municipalities" = "municipals")
+          "Regional Districts" = "districts")
       )
     ),
     column(
-      8,
-      tabsetPanel(
-        tabPanel(
-          "BC",
-          # TODO: dynamically adjust height!
-          plotlyOutput("pop", height = 650), 
-          value = "bc"
-        ),
-        tabPanel("Vancouver", plotlyOutput("vancouver"), value = "vancouver"),
-        id = "tabset"
-      ))
+      8, plotlyOutput("pop", height = 650)
+    )
   ))
   
   # server-side logic
@@ -61,12 +52,12 @@ launch <- function(prompt = interactive()) {
         addTiles() %>%
         # TODO: why isn't fitBounds() consistent? Why does setView() lead to console errors?
         fitBounds(bb[["xmin"]], bb[["ymin"]], bb[["xmax"]], bb[["ymax"]])
-      #setView(mean(bb[c("xmin", "xmax")]), mean(bb[c("ymin", "ymax")]), 4.5)
     })
     
     # update reactive values upon clicking the map and modify opacity sensibly
     observeEvent(input$map_shape_click, {
-      print(input$map_shape_click)
+      
+      # TODO: clicking on an already clicked region should remove it...
       regions$selected <- c(regions$selected, input$map_shape_click)
       
       d <- switch(
@@ -96,18 +87,26 @@ launch <- function(prompt = interactive()) {
     
     output$pop <- renderPlotly({
       
+      d <- switch(
+        input$regionType,
+        developments = popDevelopments,
+        districts = popDistricts
+      )
+      
+      keyVar <- sub("s$", "", input$regionType)
+      
       # always show overall BC population
-      d <- popDistricts[popDistricts$district %in% c(regions$selected, "British Columbia"), ]
+      d <- d[d[[keyVar]] %in% c(regions$selected, "British Columbia"), ]
       
       p <- ggplot(d, aes(Age, Population, color = Gender)) +
-        geom_line(aes(group = interaction(Year, district)), alpha = 0.1) +
+        geom_line(aes(group = Year), alpha = 0.1) +
         geom_line(aes(frame = Year)) + 
-        facet_wrap(~district, ncol = 1, scales = "free_y") + 
-        theme_BCStats() +
-        labs(y = NULL)
+        facet_wrap(as.formula(paste0("~", keyVar)), ncol = 1, scales = "free_y") + 
+        theme_BCStats() + labs(y = NULL) +
+        ggtitle("Population by age and gender from 1986 to 2016")
       
       ggplotly(p, dynamicTicks = TRUE, tooltip = "Gender") %>%
-        #style(showlegend = FALSE, traces = 3:100) %>%
+        hide_legend() %>%
         animation_opts(300)
     })
     

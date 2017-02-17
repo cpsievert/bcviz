@@ -45,14 +45,66 @@ popDistricts <- pd %>%
 devtools::use_data(popDistricts, overwrite = TRUE)
 
 # visualize evolution for entire BC area
-bc <- filter(popDistricts, district %in% c("British Columbia", "Peace River"))
+#bc <- filter(popDistricts, district %in% c("British Columbia", "Peace River"))
+#
+#p <- ggplot(bc, aes(Age, Population, color = Gender)) +
+#  geom_line(aes(group = Year), alpha = 0.1) +
+#  geom_line(aes(frame = Year)) + 
+#  facet_wrap(~district, ncol = 1, scales = "free_y")
+#ggplotly(p) %>%
+#  animation_opts(100)
+
+
+d <- read_csv("data-raw/population-developments.csv")[, -1]
+
+pd <- d %>%
+  rename(development = `Development Region`) %>%
+  select(-Total) %>%
+  gather(Age, Population, -development, -Year, -Gender)
+
+# recode the age groups using their midpoint
+grps <- unique(pd$Age)
+bins <- strsplit(grps, "-")
+bins[[1]] <- c(0, 1)
+bins[[length(bins)]] <- c(90, 100)
+bins <- setNames(
+  sapply(bins, function(x) mean(as.numeric(x))), grps
+)
+
+for (i in seq_along(bins)) {
+  pd$Age[pd$Age == names(bins)[[i]]] <- bins[[i]]
+}
+pd$Age <- as.numeric(pd$Age)
+
+
+# now, use these midpoints as input into a smoothed version of these predictions
+AgeDF <- data.frame(Age = seq(0.5, 100, length.out = 30))
+
+popDevelopments <- pd %>%
+  group_by(development, Gender, Year) %>% 
+  do(yhat = augment(
+    loess(Population ~ Age, data = ., span = 0.3), newdata = AgeDF
+  )[c("Age", ".fitted")]) %>%
+  unnest() %>%
+  rename(Population = .fitted)
+
+
+devtools::use_data(popDevelopments, overwrite = TRUE)
+
+
+# visualize evolution for entire BC area
+bc <- filter(popDevelopments, development %in% c("British Columbia", "Kootenay"))
 
 p <- ggplot(bc, aes(Age, Population, color = Gender)) +
   geom_line(aes(group = Year), alpha = 0.1) +
   geom_line(aes(frame = Year)) + 
-  facet_wrap(~district, ncol = 1, scales = "free_y")
+  facet_wrap(~development, ncol = 1, scales = "free_y")
 ggplotly(p) %>%
   animation_opts(100)
+
+
+
+
 
 
 # ------------------------------------------------------------------------
